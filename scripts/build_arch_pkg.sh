@@ -45,10 +45,17 @@ done
 
 echo ">> running makepkg"
 cd "$ARCH_DIR"
+# $srcdir stays packaging/arch/src (where the sources are staged above), but the
+# build tree and the package output go to a writable scratch directory. In CI
+# that keeps makepkg from writing into the bind mount, where overlayfs refuses
+# to create directories with EPERM. Locally it just keeps packaging/arch clean.
+export BUILDDIR="${BUILDDIR:-$ARCH_DIR/build-dir}"
+export PKGDEST="${PKGDEST:-$ARCH_DIR}"
+mkdir -p "$BUILDDIR" "$PKGDEST"
 makepkg -sf --noconfirm --nodeps
 
 mkdir -p "$ROOT/dist"
-find "$ARCH_DIR" -maxdepth 1 \( -name '*.pkg.tar.zst' -o -name '*.pkg.tar.xz' \) \
+find "$PKGDEST" -maxdepth 1 \( -name '*.pkg.tar.zst' -o -name '*.pkg.tar.xz' \) \
     -exec cp -f {} "$ROOT/dist/" \;
 
 echo
