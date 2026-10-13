@@ -260,7 +260,6 @@ MIT - see [LICENSE](LICENSE). Qt 6 / PySide6 are LGPL 3.0.
 
 ## 📚 Documentation
 
-* [docs/GITHUB_UPLOAD.md](docs/GITHUB_UPLOAD.md) - how to publish this project on GitHub properly
 * [docs/BUILD.md](docs/BUILD.md) - full build guide for every format
 * [CHANGELOG.md](CHANGELOG.md) - release history
 * [CONTRIBUTING.md](CONTRIBUTING.md) - how to contribute

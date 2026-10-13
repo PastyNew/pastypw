@@ -275,7 +275,6 @@ MIT — см. [LICENSE](LICENSE). Qt 6 / PySide6 распространяютс�
 
 ## 📚 Документация
 
-* [docs/GITHUB_UPLOAD.md](docs/GITHUB_UPLOAD.md) — как грамотно залить проект на GitHub
 * [docs/BUILD.md](docs/BUILD.md) — подробная инструкция по сборке всех форматов
 * [CHANGELOG.md](CHANGELOG.md) — история изменений
 * [CONTRIBUTING.md](CONTRIBUTING.md) — как contributing-ить
