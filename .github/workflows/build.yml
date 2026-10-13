@@ -113,7 +113,10 @@ jobs:
           ./dist/pastypw/pastypw --version || true
 
       - name: Build AppImage
-        run: ./scripts/build_appimage.sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends squashfs-tools
+          ./scripts/build_appimage.sh
 
       - name: Build Arch package (.pkg.tar.zst)
         run: |
@@ -150,7 +153,9 @@ jobs:
         run: python -m pip install --upgrade pip && pip install PySide6 pyinstaller
 
       - name: Export icons
-        run: python scripts/make_icons.py
+        run: |
+          python scripts/make_icons.py
+          python scripts/make_windows_icon.py
 
       - name: Build portable .exe
         run: |

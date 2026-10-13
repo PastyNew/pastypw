@@ -20,6 +20,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packages: `.deb`, `.rpm`, `.pkg.tar.zst` (Arch/Kali), AppImage, Windows `.exe`
 - GitHub Actions pipeline that builds every format automatically
 - 26 unit tests for the generation, strength and storage layers
+- `scripts/build_pkg_tar_zst.py` — builds a pacman package on any Linux
+  (without makepkg), writing a valid `.PKGINFO` + `.MTREE` archive
+- `scripts/make_windows_icon.py` — multi-size Windows `.ico` (7 resolutions)
+- `scripts/build_appimage.sh` — runtime + `mksquashfs` method, `linuxdeploy` fallback
+
+### Fixed
+- RPM launcher no longer hardcodes `/usr/lib` (Fedora uses `/usr/lib64`)
+- RPM dependency auto-detection disabled: the bundle ships its own Qt6
+- History saving keeps the newest entries instead of the first ones
 
 ### Creator
 - **PastyNew** - interface, algorithm and packaging

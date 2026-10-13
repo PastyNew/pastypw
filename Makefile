@@ -4,7 +4,7 @@
 PYTHON ?= python3
 PYINSTALLER ?= $(PYTHON) -m PyInstaller
 
-.PHONY: help venv install test icons screenshots linux-binary slim deb rpm arch appimage all clean
+.PHONY: help venv install test icons windows-icon screenshots linux-binary slim deb rpm arch pkg appimage all clean
 
 help:  ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -24,6 +24,9 @@ test:  ## run the unit tests
 icons:  ## export application icons into build/icons
 	$(PYTHON) scripts/make_icons.py
 
+windows-icon:  ## export the Windows .ico icon
+	$(PYTHON) scripts/make_windows_icon.py
+
 screenshots:  ## render README screenshots (headless)
 	QT_QPA_PLATFORM=offscreen $(PYTHON) scripts/render_screenshots.py
 
@@ -41,13 +44,17 @@ deb: linux-binary  ## build the .deb package (needs dpkg-deb)
 rpm:  ## build the .rpm package (needs rpmbuild)
 	./scripts/build_rpm.sh
 
-arch:  ## build the .pkg.tar.zst package (needs makepkg)
-	./scripts/build_arch_pkg.sh
+arch:  ## build the .pkg.tar.zst package (makepkg on Arch, pure python elsewhere)
+	@command -v makepkg >/dev/null 2>&1 \
+		&& ./scripts/build_arch_pkg.sh \
+		|| $(PYTHON) scripts/build_pkg_tar_zst.py
+
+pkg: arch  ## alias for arch
 
 appimage: linux-binary  ## build the portable AppImage
 	./scripts/build_appimage.sh
 
-all:  ## run the full pipeline (tests, icons, binary, deb, AppImage)
+all:  ## run the full pipeline (tests, icons, binary, deb, rpm, arch, AppImage)
 	./scripts/build_all.sh
 
 clean:  ## remove build artefacts

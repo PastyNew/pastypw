@@ -68,6 +68,15 @@
 > своём компьютере, он будет привязан к вашей версии glibc — подробности
 > в [docs/BUILD.md](docs/BUILD.md).
 
+| Платформа | Файл | Установка |
+|---|---|---|
+| Ubuntu / Debian / Mint / Kali | `pastypw_1.0.0_amd64.deb` | `sudo dpkg -i pastypw_1.0.0_amd64.deb` |
+| Fedora / RHEL / openSUSE | `pastypw-1.0.0-1.x86_64.rpm` | `sudo dnf install ./pastypw-1.0.0-1.x86_64.rpm` |
+| Arch / Manjaro / Kali | `pastypw-1.0.0-1-x86_64.pkg.tar.zst` | `sudo pacman -U pastypw-1.0.0-1-x86_64.pkg.tar.zst` |
+| Любой Linux | `pastypw-1.0.0-x86_64.AppImage` | `chmod +x *.AppImage && ./pastypw-1.0.0-x86_64.AppImage` |
+| Windows 10/11 | `PastyNew-PasswordGenerator-Setup-1.0.0.exe` | запустить установщик |
+| Windows (портативно) | `pastypw.exe` | скопировать куда угодно и запустить |
+
 ### 🐧 Ubuntu / Debian / Mint / Kali (`.deb`)
 
 ```bash
@@ -198,9 +207,10 @@ make all         # тесты + иконки + бинарник + .deb + AppImag
 | `make linux-binary` | замороженное приложение в `dist/pastypw` |
 | `make deb` | пакет `.deb` (нужен `dpkg-deb`) |
 | `make rpm` | пакет `.rpm` (нужен `rpmbuild`) |
-| `make arch` | пакет `.pkg.tar.zst` (нужен `makepkg`) |
+| `make arch` | пакет `.pkg.tar.zst` (`makepkg` на Arch, чистый Python в остальных) |
 | `make appimage` | портативный AppImage |
 | `make icons` | иконки приложения в `build/icons` |
+| `make windows-icon` | иконка Windows `.ico` |
 | `make screenshots` | скриншоты для README (без графики) |
 
 Windows:
@@ -208,6 +218,10 @@ Windows:
 ```powershell
 powershell .\scripts\build_windows.ps1
 ```
+
+> `.exe` нельзя собрать на Linux — PyInstaller не поддерживает кросс-сборку.
+> Либо запушите проект на GitHub и заберите `.exe` из **Actions → Artifacts**,
+> либо соберите на Windows командой выше.
 
 Либо соберите **все** форматы через GitHub Actions: каждый push и каждый тег
 запускает [build.yml](.github/workflows/build.yml), готовые файлы лежат в

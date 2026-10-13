@@ -5,6 +5,24 @@
 
 ---
 
+## Что собирается где
+
+| Формат | Где собирается | Как проверить |
+|---|---|---|
+| `.deb` | любой Debian/Ubuntu/Kali | `dpkg-deb -I dist/*.deb` |
+| `.rpm` | Fedora / openSUSE / или `rpm` из репозитория Debian | `rpm -qip dist/*.rpm` |
+| `.pkg.tar.zst` | Arch (`makepkg`) или любой Linux (`scripts/build_pkg_tar_zst.py`) | `tar --zstd -tf dist/*.pkg.tar.zst` |
+| `AppImage` | любой Linux (`mksquashfs` или `linuxdeploy`) | `./dist/*.AppImage --appimage-extract` |
+| `.exe` | **только Windows или GitHub Actions** | запустить файл |
+
+> **Про `.exe`:** PyInstaller принципиально не умеет собирать Windows-бинарник
+> на Linux — это ограничение инструмента, а не проекта. Два рабочих пути:
+> 1. запушить репозиторий на GitHub и забрать `.exe` из **Actions → Artifacts**
+>    (10-15 минут, делается без твоего участия);
+> 2. на Windows: `powershell .\scripts\build_windows.ps1`.
+
+---
+
 ## 0. Подготовка окружения
 
 ```bash
@@ -138,19 +156,32 @@ sudo dnf install ./dist/pastypw-1.0.0-1.x86_64.rpm
 
 ## 4. Arch Linux / Manjaro / Kali — `.pkg.tar.zst`
 
-Нужны `makepkg`, `libarchive` и `zstd`:
+### Вариант А: `makepkg` (канонический, только Arch)
 
 ```bash
 sudo pacman -S --needed base-devel libarchive zstd
+./scripts/build_arch_pkg.sh
 ```
 
+### Вариант Б: без Arch (собирается на любом Linux)
+
+Если `makepkg` недоступен, используй встроенный сборщик формата pacman:
+
 ```bash
-./scripts/build_arch_pkg.sh
+sudo apt install zstd            # Debian/Ubuntu
+python scripts/build_pkg_tar_zst.py
 # -> dist/pastypw-1.0.0-1-x86_64.pkg.tar.zst
 ```
 
-Скрипт сам подкладывает `dist/pastypw`, иконки и `.desktop` рядом с
-`PKGBUILD` и запускает `makepkg -sf`.
+Он создаёт тот же архив: `.PKGINFO`, `.MTREE` и дерево `usr/` внутри
+zstd-архива — ровно то, что читает `pacman -U`.
+
+Проверка:
+
+```bash
+tar --zstd -tf dist/pastypw-1.0.0-1-x86_64.pkg.tar.zst | head
+tar --zstd -xOf dist/pastypw-1.0.0-1-x86_64.pkg.tar.zst .PKGINFO
+```
 
 Установка:
 
@@ -170,17 +201,19 @@ podman run --rm -v "$PWD:/pkg" -w /pkg docker.io/library/archlinux:base-devel \
 ## 5. AppImage (любой Linux)
 
 ```bash
+sudo apt install squashfs-tools      # mksquashfs (основной путь)
 ./scripts/build_appimage.sh
 # -> dist/pastypw-1.0.0-x86_64.AppImage
 ```
 
-Скрипт сам скачивает `linuxdeploy` (если его нет) и собирает AppDir.
-Если FUSE недоступен в системе, `linuxdeploy` запускается с
-`APPIMAGE_EXTRACT_AND_RUN=1` — скрипт это уже учитывает.
+Скрипт склеивает AppDir из замороженного бандла, AppImage-runtime и squashfs-образ.
+Если `mksquashfs` нет, он скачает и использует `linuxdeploy`.
 
 ```bash
 chmod +x dist/*.AppImage
 ./dist/pastypw-1.0.0-x86_64.AppImage
+# проверить содержимое без запуска:
+./dist/pastypw-1.0.0-x86_64.AppImage --appimage-extract && ls squashfs-root
 ```
 
 ---
@@ -190,7 +223,17 @@ chmod +x dist/*.AppImage
 PyInstaller не умеет собирать Windows-приложение на Linux, поэтому нужен
 Windows (или GitHub Actions, который делает это сам).
 
-На Windows:
+### Вариант А: GitHub Actions (рекомендуется)
+
+```bash
+git push origin main
+```
+
+Затем **Actions → Build packages → windows → Artifacts → `windows`**:
+в архиве `pastypw.exe` (портативный) и
+`PastyNew-PasswordGenerator-Setup-1.0.0.exe` (установщик).
+
+### Вариант Б: локально на Windows
 
 ```powershell
 git clone https://github.com/PastyNew/pastypw.git
@@ -205,6 +248,9 @@ powershell .\scripts\build_windows.ps1
   (нужен [NSIS](https://nsis.sourceforge.io/Download), ставится через
   `choco install nsis`).
 
+Иконка `build\icons\pastypw.ico` генерируется автоматически
+(`scripts/make_windows_icon.py`, 7 размеров в одном файле).
+
 Без NSIS можно раздавать портативный `pastypw.exe`.
 
 ---
@@ -215,9 +261,9 @@ powershell .\scripts\build_windows.ps1
 ./scripts/build_all.sh
 ```
 
-Скрипт прогонит тесты, соберёт иконки, бинарник, `.deb` и AppImage и
-покажет список готовых файлов. RPM и Arch собираются там, где есть
-`rpmbuild` / `makepkg` (или в CI).
+Скрипт прогонит тесты, соберёт иконки, бинарник, `.deb`, `.pkg.tar.zst`,
+`.rpm` (если есть `rpmbuild`) и AppImage, после чего покажет список готовых
+файлов. Windows `.exe` собирается только на Windows или в CI.
 
 `make all` — то же самое коротко.
 

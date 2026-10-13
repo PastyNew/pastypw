@@ -16,8 +16,14 @@ License:        MIT
 URL:            https://github.com/PastyNew/pastypw
 Source0:        %{name}-%{version}.tar.gz
 
+# The application ships its own Qt6 runtime, so library auto-detection would
+# only add unsatisfiable dependencies on systems without Qt installed.
+AutoReqProv: disable
+AutoReq: disable
+
+%global debug_package %{nil}
+
 BuildArch:      x86_64
-BuildRequires:  make
 Requires:       glibc
 Requires:       libGL
 Requires:       libEGL
@@ -71,9 +77,24 @@ mkdir -p %{buildroot}%{_datadir}/doc/%{appname}
 cp -a dist/pastypw/. %{buildroot}%{_libdir}/%{appname}/
 rm -f %{buildroot}%{_libdir}/%{appname}/*.spec
 
+# The launcher resolves its own directory instead of hardcoding %{_libdir},
+# because Fedora uses /usr/lib64 while other distributions use /usr/lib.
 cat > %{buildroot}%{_bindir}/%{appname} <<'EOF'
 #!/bin/sh
-exec "/usr/lib/%{appname}/%{appname}" "$@"
+# PastyNew Password Generator launcher
+self=$(readlink -f "$0")
+dir=$(dirname "$self")
+for candidate in \
+    "$dir/../lib64/pastypw/pastypw" \
+    "$dir/../lib/pastypw/pastypw" \
+    "$dir/../libexec/pastypw/pastypw"
+do
+    if [ -x "$candidate" ]; then
+        exec "$candidate" "$@"
+    fi
+done
+echo "pastypw: application files not found" >&2
+exit 1
 EOF
 chmod 755 %{buildroot}%{_bindir}/%{appname}
 
@@ -83,8 +104,6 @@ install -m 0644 build/icons/%{appname}-256.png \
     %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/%{appname}.png
 install -m 0644 build/icons/%{appname}.svg \
     %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/%{appname}.svg
-
-%doc README.md README.en.md LICENSE CHANGELOG.md
 
 %files
 %license LICENSE

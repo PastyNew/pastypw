@@ -67,6 +67,15 @@ Grab a ready-made package from the releases page:
 > Ubuntu 22.04+, Fedora 35+, Arch and Kali. A package you build yourself is
 > tied to your own glibc version — see [docs/BUILD.md](docs/BUILD.md).
 
+| Platform | File | Install |
+|---|---|---|
+| Ubuntu / Debian / Mint / Kali | `pastypw_1.0.0_amd64.deb` | `sudo dpkg -i pastypw_1.0.0_amd64.deb` |
+| Fedora / RHEL / openSUSE | `pastypw-1.0.0-1.x86_64.rpm` | `sudo dnf install ./pastypw-1.0.0-1.x86_64.rpm` |
+| Arch / Manjaro / Kali | `pastypw-1.0.0-1-x86_64.pkg.tar.zst` | `sudo pacman -U pastypw-1.0.0-1-x86_64.pkg.tar.zst` |
+| Any Linux | `pastypw-1.0.0-x86_64.AppImage` | `chmod +x *.AppImage && ./pastypw-1.0.0-x86_64.AppImage` |
+| Windows 10/11 | `PastyNew-PasswordGenerator-Setup-1.0.0.exe` | run the installer |
+| Windows (portable) | `pastypw.exe` | copy anywhere and run |
+
 ### 🐧 Ubuntu / Debian / Mint / Kali (`.deb`)
 
 ```bash
@@ -183,9 +192,10 @@ Individual targets:
 | `make linux-binary` | frozen application in `dist/pastypw` |
 | `make deb` | `.deb` package (needs `dpkg-deb`) |
 | `make rpm` | `.rpm` package (needs `rpmbuild`) |
-| `make arch` | `.pkg.tar.zst` (needs `makepkg`) |
+| `make arch` | `.pkg.tar.zst` (`makepkg` on Arch, pure Python elsewhere) |
 | `make appimage` | portable AppImage |
 | `make icons` | application icons into `build/icons` |
+| `make windows-icon` | Windows `.ico` icon |
 | `make screenshots` | README screenshots (headless) |
 
 Windows:
@@ -193,6 +203,10 @@ Windows:
 ```powershell
 powershell .\scripts\build_windows.ps1
 ```
+
+> The `.exe` cannot be cross-compiled from Linux — PyInstaller does not
+> support it. Either push the project to GitHub and download the `.exe` from
+> **Actions → Artifacts**, or build it on Windows with the command above.
 
 Or build **everything** with GitHub Actions: every push and tag runs
 [build.yml](.github/workflows/build.yml); the files show up under

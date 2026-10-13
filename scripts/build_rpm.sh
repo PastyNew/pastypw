@@ -1,20 +1,21 @@
-# Maintainer: PastyNew <pastypew@gmail.com>
-# RPM spec for PastyNew Password Generator.
+#!/usr/bin/env bash
+# Build an RPM package for Fedora / RHEL / openSUSE.
 #
-# The PyInstaller bundle must be built before running this script:
-#     python -m PyInstaller packaging/pyinstaller/pastypw-linux.spec --noconfirm --clean
-#     python scripts/make_icons.py
+# Requirements: the PyInstaller bundle in dist/pastypw and rpmbuild.
+#     ./scripts/build_rpm.sh                    # -> dist/pastypw-1.0.0-1.x86_64.rpm
 #
-# Then:
-#     ./scripts/build_rpm.sh                 # builds dist/pastypw-1.0.0-1.x86_64.rpm
-#     RPMBUILD=rpmbuild ./scripts/build_rpm.sh
+# RPMBUILD is honoured, which is handy when rpmbuild was extracted from a
+# .deb into a private directory (no root required) and its libraries are
+# exported through LD_LIBRARY_PATH.
 #
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-if ! command -v rpmbuild >/dev/null 2>&1; then
+RPMBUILD="${RPMBUILD:-rpmbuild}"
+
+if ! command -v "$RPMBUILD" >/dev/null 2>&1; then
     cat <<'EOF'
 error: rpmbuild is not installed.
 
@@ -26,35 +27,42 @@ EOF
     exit 1
 fi
 
-if [ ! -d dist/pastypw ]; then
-    echo "error: dist/pastypw is missing - build the PyInstaller bundle first" >&2
+if [ ! -x dist/pastypw/pastypw ]; then
+    echo "error: dist/pastypw is missing - run 'make linux-binary' first" >&2
     exit 1
 fi
 
-VERSION="$(grep -m1 '__version__' pastypw/__init__.py | cut -d'"' -f2)"
+VERSION="$(grep -m1 '^__version__' pastypw/__init__.py | cut -d'"' -f2)"
+RELEASE="${RELEASE:-1}"
 ARCH_NAME="$(uname -m)"
 
 BUILD_DIR="$ROOT/build/rpm"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-mkdir -p "$BUILD_DIR/tarball/packaging" "$BUILD_DIR/tarball/build"
+mkdir -p "$BUILD_DIR/tarball/packaging" "$BUILD_DIR/tarball/build" "$BUILD_DIR/tarball/dist"
 
-cp -a packaging/desktop packaging/rpm "$BUILD_DIR/tarball/packaging/"
 cp -a packaging/desktop "$BUILD_DIR/tarball/packaging/desktop"
+cp -a packaging/rpm "$BUILD_DIR/tarball/packaging/rpm"
 cp -a build/icons "$BUILD_DIR/tarball/build/icons"
-mkdir -p "$BUILD_DIR/tarball/dist"
 cp -a dist/pastypw "$BUILD_DIR/tarball/dist/pastypw"
 for f in README.md README.en.md LICENSE CHANGELOG.md; do
-    [ -f "$f" ] && cp -a "$f" "$BUILD_DIR/tarball/$f"
+    [ -f "$ROOT/$f" ] && cp -a "$ROOT/$f" "$BUILD_DIR/tarball/$f"
 done
 
 TARBALL="$BUILD_DIR/SOURCES/pastypw-${VERSION}.tar.gz"
 tar -czf "$TARBALL" -C "$BUILD_DIR/tarball" --transform "s,^\.,pastypw-${VERSION}," .
 
-rpmbuild -ba \
+# keep the spec's version/release in sync with the project version
+SPEC_FILE="$BUILD_DIR/SPECS/pastypw.spec"
+sed -e "s/^%global version.*/%global version ${VERSION}/" \
+    -e "s/^%global release.*/%global release ${RELEASE}/" \
+    packaging/rpm/pastypw.spec > "$SPEC_FILE"
+
+"$RPMBUILD" -ba \
     --define "_topdir $BUILD_DIR" \
-    --define "_version $VERSION" \
-    packaging/rpm/pastypw.spec
+    --define "_dbpath $BUILD_DIR/rpmdb" \
+    --define "__find_debuginfo /bin/true" \
+    "$SPEC_FILE"
 
 mkdir -p dist
 find "$BUILD_DIR/RPMS" -name '*.rpm' -exec cp -f {} dist/ \;
@@ -65,4 +73,4 @@ echo "Built for $ARCH_NAME:"
 ls -lh dist/*.rpm
 echo
 echo "install with:  sudo dnf install ./dist/pastypw-*.rpm"
-echo "               (or: sudo rpm -Uvh --nodeps dist/pastypw-*.rpm)"
+echo "               (or: sudo rpm -Uvh dist/pastypw-*.rpm)"

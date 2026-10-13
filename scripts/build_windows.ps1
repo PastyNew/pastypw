@@ -24,9 +24,10 @@ if (-not (Test-Path ".venv-win")) {
 & .\.venv-win\Scripts\python.exe -m pip install --upgrade pip | Out-Null
 & .\.venv-win\Scripts\python.exe -m pip install PySide6 pyinstaller | Out-Null
 
-Step "Generating icons"
+Step "Generating icons (PNG + .ico)"
 $env:QT_QPA_PLATFORM = "offscreen"
 & .\.venv-win\Scripts\python.exe scripts\make_icons.py
+& .\.venv-win\Scripts\python.exe scripts\make_windows_icon.py
 Remove-Item Env:\QT_QPA_PLATFORM
 
 Step "Building the portable executable"
