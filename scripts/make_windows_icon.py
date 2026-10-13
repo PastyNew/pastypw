@@ -65,6 +65,11 @@ def write_ico(frames: list[tuple[int, bytes]], path: Path) -> None:
 
 
 def main() -> int:
+    # The Windows console defaults to cp1252 and cannot encode the cyrillic
+    # text printed below, which would abort the build with UnicodeEncodeError.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     app = QApplication(sys.argv[:1])
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
