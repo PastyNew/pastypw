@@ -39,6 +39,7 @@ sha256sums=()
 
 build() {
     # the frozen application produced by PyInstaller
+    install -d "$pkgdir/usr/lib"
     cp -a "$srcdir/dist/pastypw" "$pkgdir/usr/lib/pastypw"
 
     # launcher
