@@ -38,6 +38,16 @@ source=()
 sha256sums=()
 
 build() {
+    # diagnostics: shows up in the CI log when $pkgdir cannot be created
+    echo ">>> build() uid=$(id -u) user=$(id -un) fakeroot=${FAKEROOT_FAKE:-off}"
+    ls -ldn "$startdir" "$startdir/pkg" 2>&1 | sed 's/^/>>> /'
+    if mkdir -p "$startdir/pkg/.probe" 2>/dev/null; then
+        echo ">>> mkdir probe OK"
+        rmdir "$startdir/pkg/.probe"
+    else
+        echo ">>> mkdir probe FAILED"
+    fi
+
     # the frozen application produced by PyInstaller
     install -d "$pkgdir/usr/lib"
     cp -a "$srcdir/dist/pastypw" "$pkgdir/usr/lib/pastypw"

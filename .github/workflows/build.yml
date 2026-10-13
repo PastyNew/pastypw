@@ -139,7 +139,7 @@ jobs:
             docker.io/library/archlinux:base-devel \
             bash -lc "set -e; pacman -Syu --noconfirm --needed base-devel libarchive zstd >/dev/null; \
                       exec setpriv --reuid=$(id -u) --regid=$(id -g) --clear-groups \
-                      env ARCH_WORKDIR=/tmp/pastypw-arch \
+                      env ARCH_WORKDIR=/tmp/pastypw-arch USE_FAKEROOT=0 \
                       ./scripts/build_arch_pkg.sh"
 
       - name: Collect artefacts
