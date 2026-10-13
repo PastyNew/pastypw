@@ -132,10 +132,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends podman
+          # makpkg refuses to run as root, so the build happens as a normal
+          # user inside the container after the dependencies are installed.
           podman run --rm -v "$PWD:/pkg" -w /pkg \
             docker.io/library/archlinux:base-devel \
             bash -lc "pacman -Syu --noconfirm --needed base-devel libarchive zstd >/dev/null && \
-                      ./scripts/build_arch_pkg.sh"
+                      useradd -m builder && \
+                      chown -R builder:builder /pkg && \
+                      su builder -c 'cd /pkg && ./scripts/build_arch_pkg.sh'"
 
       - name: Collect artefacts
         run: |
