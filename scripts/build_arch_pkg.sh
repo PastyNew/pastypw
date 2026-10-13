@@ -30,16 +30,17 @@ if [ ! -x dist/pastypw/pastypw ]; then
     exit 1
 fi
 
-echo ">> staging sources next to PKGBUILD"
-rm -rf "$ARCH_DIR/dist" "$ARCH_DIR/build" "$ARCH_DIR/packaging"
-mkdir -p "$ARCH_DIR/dist"
-cp -a dist/pastypw "$ARCH_DIR/dist/pastypw"
-mkdir -p "$ARCH_DIR/build"
-cp -a build/icons "$ARCH_DIR/build/icons"
-mkdir -p "$ARCH_DIR/packaging"
-cp -a packaging/desktop "$ARCH_DIR/packaging/desktop"
+echo ">> staging sources into src/ (makpkg builds with \$srcdir = src)"
+STAGE="$ARCH_DIR/src"
+rm -rf "$STAGE" "$ARCH_DIR/pkg"
+mkdir -p "$STAGE/dist"
+cp -a dist/pastypw "$STAGE/dist/pastypw"
+mkdir -p "$STAGE/build"
+cp -a build/icons "$STAGE/build/icons"
+mkdir -p "$STAGE/packaging"
+cp -a packaging/desktop "$STAGE/packaging/desktop"
 for f in README.md README.en.md LICENSE CHANGELOG.md; do
-    [ -f "$ROOT/$f" ] && cp -a "$ROOT/$f" "$ARCH_DIR/$f"
+    [ -f "$ROOT/$f" ] && cp -a "$ROOT/$f" "$STAGE/$f"
 done
 
 echo ">> running makepkg"

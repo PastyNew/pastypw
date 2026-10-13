@@ -138,7 +138,7 @@ jobs:
             docker.io/library/archlinux:base-devel \
             bash -lc "pacman -Syu --noconfirm --needed base-devel libarchive zstd >/dev/null && \
                       useradd -m builder && \
-                      chown -R builder:builder /pkg && \
+                      chown -R builder:builder /pkg/packaging /pkg/dist && \
                       su builder -c 'cd /pkg && ./scripts/build_arch_pkg.sh'"
 
       - name: Collect artefacts
