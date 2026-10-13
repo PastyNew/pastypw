@@ -1,0 +1,71 @@
+# Maintainer: PastyNew <pastypew@gmail.com>
+# PastyNew Password Generator - Arch Linux / Kali (pacman) package
+#
+# Do not run makepkg by hand - use the helper, it stages the built
+# application next to this file:
+#
+#     ./scripts/build_arch_pkg.sh          # -> dist/pastypw-1.0.0-1-x86_64.pkg.tar.zst
+#
+pkgname=pastypw
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Offline password generator with a modern dark interface (by PastyNew)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/PastyNew/pastypw"
+license=('MIT')
+depends=(
+    'glibc'
+    'glib2'
+    'fontconfig'
+    'dbus'
+    'xorg-libxcb'
+    'xcb-util-wm'
+    'xcb-util-image'
+    'xcb-util-keysyms'
+    'xcb-util-renderutil'
+    'xcb-util-shape'
+    'xcb-util-xinerama'
+    'xcb-util-cursor'
+    'libxkbcommon'
+    'libxkbcommon-x11'
+    'xorg-xwayland'
+)
+optdepends=(
+    'wl-clipboard: copy passwords on Wayland'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+build() {
+    # the frozen application produced by PyInstaller
+    cp -a "$srcdir/dist/pastypw" "$pkgdir/usr/lib/pastypw"
+
+    # launcher
+    install -dm755 /dev/stdin "$pkgdir/usr/bin/pastypw" <<'EOF'
+#!/bin/sh
+exec /usr/lib/pastypw/pastypw "$@"
+EOF
+
+    # desktop integration
+    install -Dm644 "$srcdir/packaging/desktop/pastypw.desktop" \
+        "$pkgdir/usr/share/applications/pastypw.desktop"
+    for size in 16 32 48 64 128 256 512; do
+        [ -f "$srcdir/build/icons/pastypw-${size}.png" ] && \
+            install -Dm644 "$srcdir/build/icons/pastypw-${size}.png" \
+                "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/pastypw.png"
+    done
+    [ -f "$srcdir/build/icons/pastypw.svg" ] && \
+        install -Dm644 "$srcdir/build/icons/pastypw.svg" \
+            "$pkgdir/usr/share/icons/hicolor/scalable/apps/pastypw.svg"
+
+    # documentation
+    install -Dm644 "$srcdir/README.md" "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 "$srcdir/README.en.md" "$pkgdir/usr/share/doc/$pkgname/README.en.md"
+    install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
+package() {
+    # makepkg builds .PKGINFO / .MTREE / .INSTALL automatically
+    true
+}

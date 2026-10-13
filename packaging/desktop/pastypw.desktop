@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=PastyNew Password Generator
+Name[ru]=Генератор паролей PastyNew
+GenericName=Password Generator
+GenericName[ru]=Генератор паролей
+Comment=Offline password generator with a modern dark interface
+Comment[ru]=Офлайн-генератор паролей с современным тёмным интерфейсом
+Exec=pastypw
+Icon=pastypw
+Terminal=false
+Categories=Utility;Security;GTK;
+Keywords=password;generator;random;security;пароль;генератор;
+StartupNotify=true
+StartupWMClass=pastypw

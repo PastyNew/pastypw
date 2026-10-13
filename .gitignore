@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.Python
+build/
+dist/
+*.spec.bak
+
+# PyInstaller
+*.manifest
+packaging/pyinstaller/*.spec.bak
+
+# Virtual environments
+.venv/
+.venv-win/
+venv/
+env/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local build artefacts
+*.deb
+*.rpm
+*.AppImage
+*.pkg.tar.zst
+*.pkg.tar.xz
+packaging/arch/dist/
+packaging/arch/build/
+packaging/arch/packaging/
+
+# Screenshots sandbox
+build/screenshot-sandbox/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log

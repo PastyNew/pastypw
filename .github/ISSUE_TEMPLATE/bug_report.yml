@@ -1,0 +1,58 @@
+name: Report a problem with the PastyNew password generator
+description: Bug report template for the PastyNew password generator
+title: "[bug] short description"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill in the details below.
+  - type: input
+    id: version
+    attributes:
+      label: Generator version
+      placeholder: "1.0.0 (shown in the window footer) or the package version"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Ubuntu / Debian / Kali (.deb)
+        - Fedora / RHEL / openSUSE (.rpm)
+        - Arch Linux / Kali (pacman)
+        - AppImage
+        - Windows (.exe)
+        - Run from sources
+    validations:
+      required: true
+  - type: input
+    id: desktop
+    attributes:
+      label: Desktop environment / display server
+      placeholder: "KDE Plasma on Wayland, GNOME on X11, Windows 11, ..."
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the problem and how to reproduce it.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+  - type: textarea
+    id: logs
+    attributes:
+      label: Terminal output
+      description: Output of `pastypw` started from a terminal, if there is any.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I did not paste any real password into this report.
+          required: true
