@@ -63,6 +63,10 @@ build script in this repository.
 Grab a ready-made package from the releases page:
 **<https://github.com/PastyNew/pastypw/releases>**
 
+> Release packages are built inside Debian 12, so they run on Debian 12+,
+> Ubuntu 22.04+, Fedora 35+, Arch and Kali. A package you build yourself is
+> tied to your own glibc version — see [docs/BUILD.md](docs/BUILD.md).
+
 ### 🐧 Ubuntu / Debian / Mint / Kali (`.deb`)
 
 ```bash

@@ -63,6 +63,11 @@
 Скачайте готовый пакет со страницы релизов:
 **<https://github.com/PastyNew/pastypw/releases>**
 
+> Пакеты в Releases собираются в Debian 12, поэтому работают на Debian 12+,
+> Ubuntu 22.04+, Fedora 35+, Arch и Kali. Если вы собираете пакет сами на
+> своём компьютере, он будет привязан к вашей версии glibc — подробности
+> в [docs/BUILD.md](docs/BUILD.md).
+
 ### 🐧 Ubuntu / Debian / Mint / Kali (`.deb`)
 
 ```bash
