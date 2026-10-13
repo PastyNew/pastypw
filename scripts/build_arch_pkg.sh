@@ -30,9 +30,16 @@ if [ ! -x dist/pastypw/pastypw ]; then
     exit 1
 fi
 
-echo ">> staging sources into src/ (makpkg builds with \$srcdir = src)"
-STAGE="$ARCH_DIR/src"
-rm -rf "$STAGE" "$ARCH_DIR/pkg"
+echo ">> staging sources into src/ (makepkg builds with \$srcdir = src)"
+# makepkg only writes inside its own startdir, so the whole PKGBUILD workspace
+# can live on scratch storage - ARCH_WORKDIR does exactly that. In CI the bind
+# mount refuses some of the writes makepkg makes, so the build then runs in /tmp
+# inside the container instead of next to the PKGBUILD.
+WORKDIR="${ARCH_WORKDIR:-$ARCH_DIR}"
+mkdir -p "$WORKDIR"
+STAGE="$WORKDIR/src"
+rm -rf "$WORKDIR/src" "$WORKDIR/pkg" "$WORKDIR/build-dir"
+cp -a "$ARCH_DIR/PKGBUILD" "$WORKDIR/"
 mkdir -p "$STAGE/dist"
 cp -a dist/pastypw "$STAGE/dist/pastypw"
 mkdir -p "$STAGE/build"
@@ -43,19 +50,18 @@ for f in README.md README.en.md LICENSE CHANGELOG.md; do
     [ -f "$ROOT/$f" ] && cp -a "$ROOT/$f" "$STAGE/$f"
 done
 
-echo ">> running makepkg"
-cd "$ARCH_DIR"
-# $srcdir stays packaging/arch/src (where the sources are staged above), but the
-# build tree and the package output go to a writable scratch directory. In CI
-# that keeps makepkg from writing into the bind mount, where overlayfs refuses
-# to create directories with EPERM. Locally it just keeps packaging/arch clean.
-export BUILDDIR="${BUILDDIR:-$ARCH_DIR/build-dir}"
-export PKGDEST="${PKGDEST:-$ARCH_DIR}"
-mkdir -p "$BUILDDIR" "$PKGDEST"
+echo ">> running makepkg in $WORKDIR"
+cd "$WORKDIR"
+# Diagnostics: makepkg refuses to build as root, and a build directory that it
+# does not own surfaces only as a bare "Permission denied" from install(1).
+echo "   uid=$(id -u) user=$(id -un)"
+mkdir -p "$WORKDIR/pkg/pastypw"
+ls -ld "$WORKDIR" "$WORKDIR/pkg" "$WORKDIR/src"
+
 makepkg -sf --noconfirm --nodeps
 
 mkdir -p "$ROOT/dist"
-find "$PKGDEST" -maxdepth 1 \( -name '*.pkg.tar.zst' -o -name '*.pkg.tar.xz' \) \
+find "$WORKDIR" -maxdepth 1 \( -name '*.pkg.tar.zst' -o -name '*.pkg.tar.xz' \) \
     -exec cp -f {} "$ROOT/dist/" \;
 
 echo
