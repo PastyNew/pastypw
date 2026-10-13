@@ -32,6 +32,7 @@ fi
 
 echo ">> staging sources next to PKGBUILD"
 rm -rf "$ARCH_DIR/dist" "$ARCH_DIR/build" "$ARCH_DIR/packaging"
+mkdir -p "$ARCH_DIR/dist"
 cp -a dist/pastypw "$ARCH_DIR/dist/pastypw"
 mkdir -p "$ARCH_DIR/build"
 cp -a build/icons "$ARCH_DIR/build/icons"

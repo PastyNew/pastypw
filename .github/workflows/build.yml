@@ -177,7 +177,11 @@ jobs:
         shell: pwsh
         run: |
           choco install nsis --no-progress -y
-          makensis "-DpastypwExe=$PWD\dist\pastypw.exe" packaging\windows\installer.nsi
+          # chocolatey deploys to 'C:\Program Files (x86)\NSIS' but the PATH of
+          # the running PowerShell session is not refreshed, so point at it.
+          $nsis = "C:\Program Files (x86)\NSIS\makensis.exe"
+          if (-not (Test-Path $nsis)) { throw "makensis not found at $nsis" }
+          & $nsis "-DpastypwExe=$PWD\dist\pastypw.exe" packaging\windows\installer.nsi
 
       - name: Collect artefacts
         run: New-Item -ItemType Directory -Force out | Out-Null; Copy-Item dist\*.exe out\ -Force; Get-ChildItem out
