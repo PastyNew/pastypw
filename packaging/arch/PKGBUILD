@@ -38,25 +38,22 @@ source=()
 sha256sums=()
 
 build() {
-    # diagnostics: shows up in the CI log when $pkgdir cannot be created
-    echo ">>> build() uid=$(id -u) user=$(id -un) fakeroot=${FAKEROOT_FAKE:-off}"
-    ls -ldn "$startdir" "$startdir/pkg" 2>&1 | sed 's/^/>>> /'
-    if mkdir -p "$startdir/pkg/.probe" 2>/dev/null; then
-        echo ">>> mkdir probe OK"
-        rmdir "$startdir/pkg/.probe"
-    else
-        echo ">>> mkdir probe FAILED"
-    fi
+    # makepkg leaves $startdir/pkg at mode 0111 (execute only), so creating the
+    # nested $pkgdir below fails with EPERM. Restore owner write permission.
+    chmod u+rwx "$startdir/pkg"
 
     # the frozen application produced by PyInstaller
     install -d "$pkgdir/usr/lib"
     cp -a "$srcdir/dist/pastypw" "$pkgdir/usr/lib/pastypw"
 
-    # launcher
-    install -dm755 /dev/stdin "$pkgdir/usr/bin/pastypw" <<'EOF'
+    # launcher - written with cat, because 'install /dev/stdin' silently
+    # produces no file and would ship a package without the pastypw command
+    install -d "$pkgdir/usr/bin"
+    cat > "$pkgdir/usr/bin/pastypw" <<'EOF'
 #!/bin/sh
 exec /usr/lib/pastypw/pastypw "$@"
 EOF
+    chmod 755 "$pkgdir/usr/bin/pastypw"
 
     # desktop integration
     install -Dm644 "$srcdir/packaging/desktop/pastypw.desktop" \
