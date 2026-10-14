@@ -34,8 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Arch packaging: `$pkgdir/usr/lib` is created before copying the frozen app
 
 ### Changed
-- CI: the Arch build runs `makepkg` from a scratch `ARCH_WORKDIR` and disables
-  fakeroot, so nothing is written into the bind mount
+- CI: the Arch build runs `makepkg` from a scratch `ARCH_WORKDIR`, so the build
+  tree and the package never land in the bind mount
 - `.gitignore` tracks the new Arch scratch paths
 
 ## [1.0.0] - 2026-10-13
