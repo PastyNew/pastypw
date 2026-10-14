@@ -89,7 +89,7 @@ jobs:
           name: linux-packages
           path: |
             out/*
-            dist/pastypw/pastypw
+            dist/pastypw
             build/icons
           if-no-files-found: error
           retention-days: 7
@@ -111,7 +111,16 @@ jobs:
           mkdir -p dist
           cp -a fetched/dist/pastypw dist/pastypw
           chmod +x dist/pastypw/pastypw
-          ./dist/pastypw/pastypw --version || true
+          # Fail loudly on an incomplete bundle. Without _internal/ the
+          # PyInstaller bootloader cannot load libpython and the resulting
+          # AppImage starts to nothing - previously this failed silently
+          # because the smoke test below swallowed the error.
+          if ! ls dist/pastypw/_internal/libpython*.so* >/dev/null 2>&1; then
+            echo "::error::frozen bundle is incomplete - dist/pastypw/_internal is missing"
+            ls -la dist/pastypw/ || true
+            exit 1
+          fi
+          echo "bundle OK: $(ls dist/pastypw/_internal | wc -l) files in _internal"
 
       # The AppImage and the Arch package need build/icons/pastypw-256.png.
       # This job has no PySide6, so the icons have to come from the artefact
